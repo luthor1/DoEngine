@@ -1,0 +1,53 @@
+# Build and output directories
+build/
+bin/
+lib/
+out/
+debug/
+release/
+x64/
+x86/
+
+# IDE files (Visual Studio, VS Code, JetBrains)
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.*
+*.user
+.vscode/
+.idea/
+*.swp
+*.bak
+*.orig
+
+# CMake temporary files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+Makefile
+_deps/
+
+# Logs and user data
+*.log
+*.tlog
+*.lastbuildstate
+*.idb
+*.pdb
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+
+# External dependencies (if not managed by FetchContent)
+thirdparty/miniaudio/
+
+# OS specific
+Thumbs.db
+Desktop.ini
+.DS_Store
