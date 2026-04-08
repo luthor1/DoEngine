@@ -38,6 +38,15 @@ namespace DoEngine {
         TextureData m_Data;
     };
 
+    class ShaderAsset : public Asset {
+    public:
+        ShaderAsset(const std::string& path, ShaderData data) : Asset(path), m_Data(std::move(data)) {}
+        const ShaderData& GetData() const { return m_Data; }
+
+    private:
+        ShaderData m_Data;
+    };
+
     class AssetRegistry {
     public:
         static void Initialize();
@@ -48,6 +57,9 @@ namespace DoEngine {
         
         // Get or load a texture
         static std::shared_ptr<TextureAsset> GetTexture(const std::string& path);
+
+        // Get or load a shader
+        static std::shared_ptr<ShaderAsset> GetShader(const std::string& path);
 
     private:
         // Cache of loaded assets

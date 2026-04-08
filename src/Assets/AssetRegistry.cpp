@@ -38,4 +38,19 @@ namespace DoEngine {
         return texture;
     }
 
+    std::shared_ptr<ShaderAsset> AssetRegistry::GetShader(const std::string& path) {
+        if (s_AssetCache.find(path) != s_AssetCache.end()) {
+            return std::dynamic_pointer_cast<ShaderAsset>(s_AssetCache[path]);
+        }
+
+        ShaderData data;
+        if (AssetImporter::LoadShaderBinary(path, data)) {
+            auto shader = std::make_shared<ShaderAsset>(path, std::move(data));
+            s_AssetCache[path] = shader;
+            return shader;
+        }
+
+        return nullptr;
+    }
+
 }

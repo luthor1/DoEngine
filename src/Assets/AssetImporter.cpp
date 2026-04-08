@@ -40,4 +40,22 @@ namespace DoEngine {
         return true;
     }
 
+    bool AssetImporter::LoadShaderBinary(const std::string& path, ShaderData& outData) {
+        std::ifstream file(path, std::ios::ate | std::ios::binary);
+        if (!file.is_open()) return false;
+
+        size_t fileSize = (size_t)file.tellg();
+        outData.Bytecode.resize(fileSize);
+
+        file.seekg(0);
+        file.read(outData.Bytecode.data(), fileSize);
+        file.close();
+
+        // Infer stage from filename
+        if (path.find(".vs") != std::string::npos) outData.Stage = "vs";
+        else if (path.find(".ps") != std::string::npos) outData.Stage = "ps";
+
+        return true;
+    }
+
 }

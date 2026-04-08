@@ -1,0 +1,63 @@
+﻿MSBuild version 17.14.40+3e7442088 for .NET Framework
+
+  DirectX-Headers.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\DirectX-Headers.lib
+  DirectX-Guids.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\DirectX-Guids.lib
+  Jolt.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\Jolt.lib
+  enkiTS.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\enkiTS.lib
+  glfw.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\glfw3.lib
+  nvrhi.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\nvrhi.lib
+  nvrhi_d3d12.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\nvrhi_d3d12.lib
+  nvrhi_vk.vcxproj -> C:\Users\Ali\Documents\c++\DoEngine\build\lib\Debug\nvrhi_vk.lib
+  main.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../main.cpp')
+  
+  Application.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Engine/Application.cpp')
+  
+  RHI.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Graphics/RHI.cpp')
+  
+  Renderer.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Graphics/Renderer.cpp')
+  
+  AudioSystem.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Audio/AudioSystem.cpp')
+  
+  PhysicsSystem.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Physics/PhysicsSystem.cpp')
+  
+  AssetImporter.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Assets/AssetImporter.cpp')
+  
+  AssetRegistry.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Assets/AssetRegistry.cpp')
+  
+  Scene.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/ECS/Scene.cpp')
+  
+  ScriptEngine.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Scripting/ScriptEngine.cpp')
+  
+  VFS.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Core/VFS/VFS.cpp')
+  
+  JobSystem.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Core/JobSystem/JobSystem.cpp')
+  
+  Window.cpp
+C:\Users\Ali\Documents\c++\DoEngine\thirdparty\spdlog\include\spdlog\fmt\bundled\base.h(465,28): error C2338: static_assert failed: 'Unicode support requires compiling with /utf-8' [C:\Users\Ali\Documents\c++\DoEngine\build\DoEngine.vcxproj]
+  (compiling source file '../src/Core/Window.cpp')
+  
+  Generating Code...

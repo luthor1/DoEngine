@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 #include <cstdint>
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
 // Common macros and aliases
 namespace DoEngine {
@@ -13,10 +15,14 @@ namespace DoEngine {
     using uint32 = unsigned int;
     using uint64 = unsigned long long;
     
-    // Debug logging macros
-    #ifdef DO_DEBUG
-        #define DO_LOG(x) std::cout << "[DO_ENGINE] " << x << std::endl
-    #else
-        #define DO_LOG(x)
-    #endif
+    // Core Logging System
+    #define DO_CORE_TRACE(...)    spdlog::trace(__VA_ARGS__)
+    #define DO_CORE_INFO(...)     spdlog::info(__VA_ARGS__)
+    #define DO_CORE_WARN(...)     spdlog::warn(__VA_ARGS__)
+    #define DO_CORE_ERROR(...)    spdlog::error(__VA_ARGS__)
+    #define DO_CORE_CRITICAL(...) spdlog::critical(__VA_ARGS__)
+
+    // Legacy support (to be phased out)
+    #define DO_LOG(x)             spdlog::info(x)
+    #define DO_LOG_ERROR(x)       spdlog::error(x)
 }

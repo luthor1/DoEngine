@@ -24,6 +24,7 @@ To configure and build the project, run:
 ```bash
 cmake -B build -S .
 cmake --build build
+cmake --build build --target DoEngine
 ```
 
 ## License

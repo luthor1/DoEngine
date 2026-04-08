@@ -20,6 +20,11 @@ namespace DoEngine {
         std::vector<uint8_t> Pixels;
     };
 
+    struct ShaderData {
+        std::vector<char> Bytecode;
+        std::string Stage; // "vs" or "ps"
+    };
+
     class AssetImporter {
     public:
         // Main import function (transforms Ham to Binary)
@@ -29,6 +34,7 @@ namespace DoEngine {
         // Helper to load binary files
         static bool LoadMeshBinary(const std::string& path, MeshData& outData);
         static bool LoadTextureBinary(const std::string& path, TextureData& outData);
+        static bool LoadShaderBinary(const std::string& path, ShaderData& outData);
     };
 
 }

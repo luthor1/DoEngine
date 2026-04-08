@@ -1,0 +1,15 @@
+CompileFlags:
+  Add: [
+    "-I", "src",
+    "-I", "thirdparty/nvrhi/include",
+    "-I", "thirdparty/glfw/include",
+    "-I", "thirdparty/jolt",
+    "-I", "thirdparty/entt/src",
+    "-I", "thirdparty/enkits/src",
+    "-I", "thirdparty/miniaudio",
+    "-I", "thirdparty/nvrhi/thirdparty/DirectX-Headers/include",
+    "-I", "thirdparty",
+    "-DNVRHI_WITH_VULKAN=1",
+    "-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1",
+    "-std=c++20"
+  ]
