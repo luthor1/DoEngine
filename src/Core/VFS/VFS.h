@@ -23,7 +23,7 @@ namespace DoEngine {
 
     class VFS {
     public:
-        static void Initialize();
+        static void Initialize(const std::string& engineRoot);
         static void Shutdown();
 
         // Mount a physical directory or a pack file

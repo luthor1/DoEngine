@@ -22,30 +22,31 @@ add_subdirectory(thirdparty)
 set(ENGINE_SOURCES
     main.cpp
     src/Engine/Application.cpp
-    src/Engine/Application.h
-    src/Graphics/RHI.cpp
-    src/Graphics/RHI.h
-    src/Graphics/Renderer.cpp
-    src/Graphics/Renderer.h
-    src/Audio/AudioSystem.cpp
-    src/Audio/AudioSystem.h
-    src/Physics/PhysicsSystem.cpp
-    src/Physics/PhysicsSystem.h
-    src/Assets/AssetImporter.cpp
-    src/Assets/AssetImporter.h
-    src/Assets/AssetRegistry.cpp
-    src/Assets/AssetRegistry.h
-    src/ECS/Scene.cpp
-    src/ECS/Scene.h
-    src/Scripting/ScriptEngine.cpp
-    src/Scripting/ScriptEngine.h
-    src/Core/VFS/VFS.cpp
-    src/Core/VFS/VFS.h
-    src/Core/JobSystem/JobSystem.cpp
-    src/Core/JobSystem/JobSystem.h
-    src/Core/Base.h
     src/Core/Window.cpp
-    src/Core/Window.h
+    src/Core/PathUtils.cpp
+    src/Core/VFS/VFS.cpp
+    src/Core/JobSystem/JobSystem.cpp
+    src/Graphics/RHI.cpp
+    src/Graphics/Renderer.cpp
+    src/Audio/AudioSystem.cpp
+    src/Physics/PhysicsSystem.cpp
+    src/Assets/AssetImporter.cpp
+    src/Assets/stb_image_impl.cpp
+    src/Assets/AssetRegistry.cpp
+    src/ECS/Scene.cpp
+    src/Scripting/ScriptEngine.cpp
+    src/Editor/Editor.cpp
+    src/Editor/ImGui_ImplNVRHI.cpp
+    src/Project/ProjectManager.cpp
+    # ImGui Core
+    thirdparty/imgui/imgui.cpp
+    thirdparty/imgui/imgui_demo.cpp
+    thirdparty/imgui/imgui_draw.cpp
+    thirdparty/imgui/imgui_tables.cpp
+    thirdparty/imgui/imgui_widgets.cpp
+    # ImGui Backends
+    thirdparty/imgui/backends/imgui_impl_glfw.cpp
+    thirdparty/imgui/backends/imgui_impl_vulkan.cpp
 )
 
 add_executable(DoEngine ${ENGINE_SOURCES})

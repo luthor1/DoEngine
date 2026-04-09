@@ -42,7 +42,11 @@ namespace DoEngine {
         std::string m_Root;
     };
 
-    void VFS::Initialize() {
+    void VFS::Initialize(const std::string& engineRoot) {
+        // Mount the engine root to engine://
+        Mount("engine://", std::make_unique<PhysicalFileSystem>(engineRoot));
+        
+        std::cout << "[INFO] VFS: Engine Root mounted at " << engineRoot << std::endl;
         std::cout << "[INFO] Virtual File System initialized." << std::endl;
     }
 

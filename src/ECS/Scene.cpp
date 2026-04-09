@@ -11,8 +11,16 @@ namespace DoEngine {
         m_Registry.clear();
     }
 
-    entt::entity Scene::CreateEntity() {
-        return m_Registry.create();
+    entt::entity Scene::CreateEntity(const std::string& name) {
+        entt::entity entity = m_Registry.create();
+        
+        // Add basic components
+        m_Registry.emplace<TransformComponent>(entity);
+        
+        auto& tag = m_Registry.emplace<TagComponent>(entity);
+        tag.Tag = name.empty() ? "Entity" : name;
+        
+        return entity;
     }
 
     void Scene::DestroyEntity(entt::entity entity) {

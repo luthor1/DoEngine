@@ -23,6 +23,6 @@ namespace DoEngine {
     #define DO_CORE_CRITICAL(...) spdlog::critical(__VA_ARGS__)
 
     // Legacy support (to be phased out)
-    #define DO_LOG(x)             spdlog::info(x)
-    #define DO_LOG_ERROR(x)       spdlog::error(x)
+    #define DO_LOG(...)           spdlog::info(__VA_ARGS__)
+    #define DO_LOG_ERROR(...)     spdlog::error(__VA_ARGS__)
 }

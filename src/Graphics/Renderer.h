@@ -16,7 +16,7 @@ namespace DoEngine {
 
         // High-level Draw commands
         void Clear(float r, float g, float b, float a);
-        void DrawTriangle(); // Temporary for demo
+        void RenderScene(class Scene* scene);
 
         // Pipeline management
         PipelineHandle CreatePipeline(const PipelineDesc& desc);

@@ -6,16 +6,16 @@
 #include <filesystem>
 #include <cstdint>
 
+#include "../Graphics/GraphicsTypes.h" // For Vertex struct
+
 namespace DoEngine {
 
     struct MeshData {
-        // Vertex and index data...
-        std::vector<float> Vertices;
+        std::vector<Vertex> Vertices;
         std::vector<uint32> Indices;
     };
 
     struct TextureData {
-        // Pixel data and metadata...
         uint32 Width, Height, Channels;
         std::vector<uint8_t> Pixels;
     };

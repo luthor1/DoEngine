@@ -22,9 +22,10 @@ DoEngine is a modern, high-performance 3D game engine built from scratch using C
 ## Getting Started
 To configure and build the project, run:
 ```bash
-cmake -B build -S .
-cmake --build build
+cmake -B build -S.
 cmake --build build --target DoEngine
+./build/bin/debug/DoEngine.exe
+cmake --build build
 ```
 
 ## License

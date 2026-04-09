@@ -2,6 +2,7 @@
 
 #include "../Core/Base.h"
 #include "entt/entt.hpp"
+#include "Components.h"
 #include <utility>
 
 namespace DoEngine {
@@ -12,7 +13,7 @@ public:
   ~Scene();
 
   // Entity management
-  entt::entity CreateEntity();
+  entt::entity CreateEntity(const std::string& name = std::string());
   void DestroyEntity(entt::entity entity);
 
   // Component management
@@ -37,6 +38,11 @@ public:
   template <typename... Component> auto View() {
     return m_Registry.view<Component...>();
   }
+
+  entt::registry& GetRegistry() { return m_Registry; }
+  
+  template<typename T>
+  T& Get(entt::entity entity) { return m_Registry.get<T>(entity); }
 
   void OnUpdate(float deltaTime);
 

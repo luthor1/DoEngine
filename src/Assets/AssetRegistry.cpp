@@ -19,11 +19,14 @@ namespace DoEngine {
             return std::dynamic_pointer_cast<MeshAsset>(s_AssetCache[path]);
         }
 
-        // Create Mesh asset
         MeshData data;
-        auto mesh = std::make_shared<MeshAsset>(path, std::move(data));
-        s_AssetCache[path] = mesh;
-        return mesh;
+        if (AssetImporter::LoadMeshBinary(path, data)) {
+            auto mesh = std::make_shared<MeshAsset>(path, std::move(data));
+            s_AssetCache[path] = mesh;
+            return mesh;
+        }
+
+        return nullptr;
     }
 
     std::shared_ptr<TextureAsset> AssetRegistry::GetTexture(const std::string& path) {
@@ -31,11 +34,14 @@ namespace DoEngine {
             return std::dynamic_pointer_cast<TextureAsset>(s_AssetCache[path]);
         }
 
-        // Create Texture asset
         TextureData data;
-        auto texture = std::make_shared<TextureAsset>(path, std::move(data));
-        s_AssetCache[path] = texture;
-        return texture;
+        if (AssetImporter::LoadTextureBinary(path, data)) {
+            auto texture = std::make_shared<TextureAsset>(path, std::move(data));
+            s_AssetCache[path] = texture;
+            return texture;
+        }
+
+        return nullptr;
     }
 
     std::shared_ptr<ShaderAsset> AssetRegistry::GetShader(const std::string& path) {
