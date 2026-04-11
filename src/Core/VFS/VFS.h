@@ -29,6 +29,9 @@ namespace DoEngine {
         // Mount a physical directory or a pack file
         static void Mount(const std::string& virtualPath, std::unique_ptr<IFileSystem> fs);
 
+        // Convenience: Mount a physical path directly
+        static void MountPath(const std::string& virtualPath, const std::string& physicalPath);
+
         // Global file access
         static bool FileExists(const std::string& path);
         static bool ReadFile(const std::string& path, FileData& outData);

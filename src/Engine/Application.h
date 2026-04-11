@@ -16,6 +16,7 @@
 #include "../Core/JobSystem/JobSystem.h"
 #include "../Core/VFS/VFS.h"
 #include "../Graphics/Renderer.h"
+#include "../Project/ProjectManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

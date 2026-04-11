@@ -4,9 +4,17 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 // NVRHI'nin temel tiplerini kullanabilmek için ekliyoruz
 #include <nvrhi/nvrhi.h>
+
+// Raw Vulkan handle tipleri (forward declare ile include kaçınıyoruz)
+typedef struct VkInstance_T* VkInstance;
+typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
+typedef struct VkDevice_T* VkDevice;
+typedef struct VkQueue_T* VkQueue;
+typedef struct VkRenderPass_T* VkRenderPass;
 
 namespace DoEngine {
 
@@ -15,6 +23,11 @@ enum class GraphicsAPI { Vulkan, D3D12 };
 // --- RHI Opaque Handles ---
 struct IResource {
   virtual ~IResource() = default;
+};
+
+template <typename T> struct ResourceWrapper : public IResource {
+  nvrhi::RefCountPtr<T> handle;
+  ResourceWrapper(T *p) : handle(p) {}
 };
 using BufferHandle = std::shared_ptr<IResource>;
 using TextureHandle = std::shared_ptr<IResource>;
@@ -109,6 +122,18 @@ public:
   void Draw(uint32_t vertexCount, uint32_t instanceCount = 1);
 
   GraphicsAPI GetCurrentAPI() const { return m_CurrentAPI; }
+
+  // Raw Vulkan handle'larını imgui_impl_vulkan için expose et
+  struct VulkanHandles {
+    VkInstance       Instance       = nullptr;
+    VkPhysicalDevice PhysicalDevice = nullptr;
+    VkDevice         Device         = nullptr;
+    VkQueue          GraphicsQueue  = nullptr;
+    uint32_t         QueueFamily    = 0;
+    uint32_t         MinImageCount  = 2;
+    uint32_t         ImageCount     = 3;
+  };
+  VulkanHandles GetVulkanHandles() const;
 
 private:
   bool InitVulkan(void *windowHandle);

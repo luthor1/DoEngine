@@ -26,10 +26,6 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace DoEngine {
 
-template <typename T> struct ResourceWrapper : public IResource {
-  nvrhi::RefCountPtr<T> handle;
-  ResourceWrapper(T *p) : handle(p) {}
-};
 
 struct RHIDevice::BackendData {
   nvrhi::DeviceHandle m_Device;
@@ -37,6 +33,7 @@ struct RHIDevice::BackendData {
   VkPhysicalDevice PhysicalDevice = VK_NULL_HANDLE;
   VkDevice Device = VK_NULL_HANDLE;
   VkQueue GraphicsQueue = VK_NULL_HANDLE;
+  uint32_t GraphicsQueueFamily = 0;
 
   VkSurfaceKHR Surface = VK_NULL_HANDLE;
   VkSwapchainKHR SwapChain = VK_NULL_HANDLE;
@@ -76,8 +73,18 @@ bool RHIDevice::InitVulkan(void *windowHandle) {
   const char **glfwExts = glfwGetRequiredInstanceExtensions(&glfwExtCount);
   std::vector<const char *> exts(glfwExts, glfwExts + glfwExtCount);
 
+  // Validation Layers
+  const char* validationLayer = "VK_LAYER_KHRONOS_validation";
+  std::vector<const char*> layers;
+#ifdef _DEBUG
+  layers.push_back(validationLayer);
+  DO_LOG("Vulkan: Validation layers enabled.");
+#endif
+
   VkInstanceCreateInfo instInfo = {VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
   instInfo.pApplicationInfo = &appInfo;
+  instInfo.enabledLayerCount = (uint32_t)layers.size();
+  instInfo.ppEnabledLayerNames = layers.data();
   instInfo.enabledExtensionCount = static_cast<uint32_t>(exts.size());
   instInfo.ppEnabledExtensionNames = exts.data();
 
@@ -106,28 +113,55 @@ bool RHIDevice::InitVulkan(void *windowHandle) {
   m_BackendData->PhysicalDevice = gpus[0];
 
   // 3. Device & Extensions
+  // Grafik kuyruğunu destekleyen queue family'yi bul
+  uint32_t queueFamilyCount = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties(m_BackendData->PhysicalDevice, &queueFamilyCount, nullptr);
+  std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+  vkGetPhysicalDeviceQueueFamilyProperties(m_BackendData->PhysicalDevice, &queueFamilyCount, queueFamilies.data());
+
+  uint32_t graphicsQueueFamily = 0;
+  for (uint32_t i = 0; i < queueFamilyCount; i++) {
+    if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+      graphicsQueueFamily = i;
+      break;
+    }
+  }
+
   float queuePriority = 1.0f;
   VkDeviceQueueCreateInfo queueInfo = {VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
+  queueInfo.queueFamilyIndex = graphicsQueueFamily;
   queueInfo.queueCount = 1;
-  queueInfo.pQueuePriorities = &queuePriority;
+  queueInfo.pQueuePriorities = &queuePriority;  std::vector<const char *> devExts = {
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+      VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+      VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME,
+      VK_KHR_MAINTENANCE2_EXTENSION_NAME,
+      VK_KHR_BIND_MEMORY_2_EXTENSION_NAME,
+      VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME
+  };
 
-  std::vector<const char *> devExts = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
-
-  // Vulkan 1.2 Features (Buffer Device Address, Timeline Semaphores are often used by NVRHI)
+  // Vulkan 1.2 Features
   VkPhysicalDeviceVulkan12Features vk12Features = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES};
   vk12Features.bufferDeviceAddress = VK_TRUE;
   vk12Features.timelineSemaphore = VK_TRUE;
   vk12Features.runtimeDescriptorArray = VK_TRUE;
   vk12Features.descriptorBindingPartiallyBound = VK_TRUE;
 
-  // Vulkan 1.3 Features (Dynamic Rendering & Synchronization 2)
+  // Vulkan 1.3 Features
   VkPhysicalDeviceVulkan13Features vk13Features = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES};
-  vk13Features.pNext = &vk12Features; // Link 1.2 features
+  vk13Features.pNext = &vk12Features; 
   vk13Features.dynamicRendering = VK_TRUE;
-  vk13Features.synchronization2 = VK_TRUE;
+  // vk13Features.synchronization2 = VK_TRUE; // Disabled for stabilization test
+
+  // Basic Features wrapping
+  VkPhysicalDeviceFeatures2 deviceFeatures2 = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2};
+  deviceFeatures2.pNext = &vk13Features; 
+  deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
+  deviceFeatures2.features.fillModeNonSolid = VK_TRUE;
+  deviceFeatures2.features.shaderInt64 = VK_TRUE;
 
   VkDeviceCreateInfo devInfo = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
-  devInfo.pNext = &vk13Features;
+  devInfo.pNext = &deviceFeatures2;
   devInfo.queueCreateInfoCount = 1;
   devInfo.pQueueCreateInfos = &queueInfo;
   devInfo.enabledExtensionCount = static_cast<uint32_t>(devExts.size());
@@ -137,23 +171,14 @@ bool RHIDevice::InitVulkan(void *windowHandle) {
     DO_CORE_ERROR("Failed to create Vulkan Logical Device!");
     return false;
   }
-  vkGetDeviceQueue(m_BackendData->Device, 0, 0, &m_BackendData->GraphicsQueue);
+  vkGetDeviceQueue(m_BackendData->Device, graphicsQueueFamily, 0, &m_BackendData->GraphicsQueue);
+  m_BackendData->GraphicsQueueFamily = graphicsQueueFamily;
 
   // =================================================================================
-  // CRITICAL FIX: Load device-level function pointers into the dynamic dispatcher.
+  // Load device-level function pointers
   VULKAN_HPP_DEFAULT_DISPATCHER.init(vk::Device(m_BackendData->Device));
-  
-  // DIAGNOSTIC LOGS (Fixed formatting to ensure values are printed)
-  printf("[DIAGNOSTIC] vkCmdPipelineBarrier2 Address: %p\n", (void*)VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdPipelineBarrier2);
-  printf("[DIAGNOSTIC] vkCmdCopyBufferToImage Address: %p\n", (void*)VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdCopyBufferToImage);
-  fflush(stdout);
-
-  if (!VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdPipelineBarrier2) {
-      DO_CORE_WARN("RHI: CRITICAL - vkCmdPipelineBarrier2 is NULL!");
-  }
   // =================================================================================
 
-  // 4. NVRHI Device Creation
   DO_CORE_INFO("RHI: Initializing NVRHI Device...");
   
   nvrhi::vulkan::DeviceDesc nvrhiDesc;
@@ -161,7 +186,10 @@ bool RHIDevice::InitVulkan(void *windowHandle) {
   nvrhiDesc.physicalDevice = m_BackendData->PhysicalDevice;
   nvrhiDesc.device = m_BackendData->Device;
   nvrhiDesc.graphicsQueue = m_BackendData->GraphicsQueue;
-  nvrhiDesc.graphicsQueueIndex = 0;
+  nvrhiDesc.graphicsQueueIndex = m_BackendData->GraphicsQueueFamily;
+  nvrhiDesc.deviceExtensions = devExts.data();
+  nvrhiDesc.numDeviceExtensions = devExts.size();
+  nvrhiDesc.bufferDeviceAddressSupported = false; // Disabled for stabilization test
 
   // Inform NVRHI about enabled extensions so it can load the correct functions
   nvrhiDesc.instanceExtensions = exts.data();
@@ -251,6 +279,18 @@ void RHIDevice::WaitForIdle() {
     m_BackendData->m_Device->waitForIdle();
 }
 
+RHIDevice::VulkanHandles RHIDevice::GetVulkanHandles() const {
+  VulkanHandles h;
+  h.Instance       = m_BackendData->Instance;
+  h.PhysicalDevice = m_BackendData->PhysicalDevice;
+  h.Device         = m_BackendData->Device;
+  h.GraphicsQueue  = m_BackendData->GraphicsQueue;
+  h.QueueFamily    = m_BackendData->GraphicsQueueFamily;
+  h.MinImageCount  = 2;
+  h.ImageCount     = (uint32_t)m_BackendData->SwapChainFramebuffers.size();
+  return h;
+}
+
 nvrhi::IDevice *RHIDevice::GetDevice() const {
   return m_BackendData->m_Device.Get();
 }
@@ -306,7 +346,8 @@ void RHIDevice::BeginFrame() {
                               m_BackendData->ImageAvailableSemaphore, 0);
 
   m_BackendData->m_CurrentCommandList =
-      m_BackendData->m_Device->createCommandList();
+      m_BackendData->m_Device->createCommandList(
+          nvrhi::CommandListParameters().setEnableImmediateExecution(false));
   m_BackendData->m_CurrentCommandList->open();
 }
 
@@ -516,7 +557,17 @@ void RHIDevice::WriteBuffer(BufferHandle buffer, const void *data,
 
 void RHIDevice::WriteTexture(TextureHandle texture, const void *data,
                              size_t size) {
-  // Vulkan implementation goes here
+  if (!m_BackendData->m_CurrentCommandList)
+    return;
+  auto native =
+      static_cast<ResourceWrapper<nvrhi::ITexture> *>(texture.get())->handle;
+  auto& desc = native->getDesc();
+  
+  // ImGui font atlas için genellikle RGBA8 (4 bytes)
+  uint32_t bytesPerPixel = 4; 
+  uint32_t rowPitch = desc.width * bytesPerPixel;
+  
+  m_BackendData->m_CurrentCommandList->writeTexture(native, 0, 0, data, rowPitch, size);
 }
 
 void RHIDevice::Draw(uint32_t vertexCount, uint32_t instanceCount) {

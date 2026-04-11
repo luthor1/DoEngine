@@ -52,49 +52,8 @@ namespace DoEngine {
         
         m_ActiveScene = std::make_unique<Scene>();
 
-        // Load Engine-Internal Shaders for the Renderer/Editor
-        auto vsAsset = AssetRegistry::GetShader("engine://shaders/Standard.vs.spv");
-        auto psAsset = AssetRegistry::GetShader("engine://shaders/Standard.ps.spv");
-
-        if (vsAsset && psAsset) {
-            auto vsHandle = m_RHIDevice->CreateShader("main", "vs", vsAsset->GetData().Bytecode.data(), vsAsset->GetData().Bytecode.size());
-            auto psHandle = m_RHIDevice->CreateShader("main", "ps", psAsset->GetData().Bytecode.data(), psAsset->GetData().Bytecode.size());
-
-            // Prepare Global Layouts
-            VertexAttribute attributes[] = {
-                { "POSITION", 0,                          sizeof(Vertex) },
-                { "COLOR",    offsetof(Vertex, Color),    sizeof(Vertex) },
-                { "NORMAL",   offsetof(Vertex, Normal),   sizeof(Vertex) },
-                { "TEXCOORD", offsetof(Vertex, TexCoord), sizeof(Vertex) }
-            };
-            auto inputLayout = m_RHIDevice->CreateInputLayout(attributes, 4);
-            
-            BindingLayoutItem globalItems[] = { { 0, BindingType::ConstantBuffer } };
-            m_BindingLayout = m_RHIDevice->CreateBindingLayout(globalItems, 1);
-
-            if (vsHandle && psHandle && inputLayout && m_BindingLayout) {
-                PipelineDesc pDesc;
-                pDesc.vertexShader = vsHandle;
-                pDesc.pixelShader = psHandle;
-                pDesc.inputLayout = inputLayout;
-                pDesc.bindingLayout = m_BindingLayout;
-                m_TrianglePipeline = m_Renderer->CreatePipeline(pDesc);
-                
-                // Uniforms
-                BufferDesc ubDesc;
-                ubDesc.byteSize = sizeof(UniformData);
-                ubDesc.isConstantBuffer = true;
-                m_UniformBuffer = m_RHIDevice->CreateBuffer(ubDesc);
-                
-                if (m_UniformBuffer) {
-                    std::vector<std::pair<uint32_t, std::shared_ptr<IResource>>> globalResources = { { 0, m_UniformBuffer } };
-                    m_BindingSet = m_RHIDevice->CreateBindingSet(m_BindingLayout, globalResources);
-                }
-            }
-        } else {
-            DO_CORE_ERROR("Engine Internal Shaders (Standard) not found!");
-        }
-
+        // Pipeline kurulumu editor moduna girildiğinde yapılacak (lazy).
+        // Hub modu yalnızca ImGui ile çalışır, 3D pipeline gerektirmez.
         DO_CORE_INFO("Application initialized successfully in Hub mode.");
     }
 
@@ -104,8 +63,21 @@ namespace DoEngine {
 
     void Application::OpenProject(const std::string& path) {
         DO_CORE_INFO("Project System: Opening project at {}", path);
-        // TODO: VFS Mount of the project path to "project://"
-        m_State = EngineState::Editor;
+        
+        ProjectInfo info;
+        if (ProjectManager::OpenProject(path, info)) {
+            // Proje VFS mount noktasına bağla
+            VFS::MountPath("project://", path);
+            
+            // Content browser başlangıç yolu
+            // Sahneyi sıfırla
+            m_ActiveScene = std::make_unique<Scene>();
+            
+            m_State = EngineState::Editor;
+            DO_CORE_INFO("Project opened: {}", info.Name);
+        } else {
+            DO_CORE_ERROR("Failed to open project at: {}", path);
+        }
     }
 
     void Application::Run() {
@@ -113,37 +85,32 @@ namespace DoEngine {
         m_LastFrameTime = (float)glfwGetTime();
 
         while (m_Running && !m_Window->ShouldClose()) {
-            // 1. Girdileri Oku
             glfwPollEvents();
 
             float currentTime = (float)glfwGetTime();
             m_DeltaTime = currentTime - m_LastFrameTime;
             m_LastFrameTime = currentTime;
 
-            // --- CRASH TRACE START ---
-            DO_CORE_INFO("[TRACE] Starting Frame Operations...");
-
             m_Renderer->BeginFrame();
-            DO_CORE_INFO("[TRACE] Renderer::BeginFrame success");
-
             m_Editor->BeginFrame();
-            DO_CORE_INFO("[TRACE] Editor::BeginFrame success");
+            m_Renderer->Clear(0.09f, 0.09f, 0.12f, 1.0f);
 
-            DO_CORE_INFO("[TRACE] Attempting Renderer::Clear...");
-            m_Renderer->Clear(0.12f, 0.12f, 0.14f, 1.0f);
-            DO_CORE_INFO("[TRACE] Renderer::Clear success");
-            
             if (m_State == EngineState::Hub) {
-                DO_CORE_INFO("[TRACE] Attempting Editor::OnHubUpdate...");
                 m_Editor->OnHubUpdate(this);
-                DO_CORE_INFO("[TRACE] Editor::OnHubUpdate success");
             } else if (m_State == EngineState::Editor) {
-                // Update Global Uniforms
-                glm::mat4 model = glm::rotate(glm::mat4(1.0f), currentTime, glm::vec3(0.0f, 0.0f, 1.0f));
-                glm::mat4 view  = glm::lookAt(glm::vec3(0,0,2), glm::vec3(0,0,0), glm::vec3(0,1,0));
-                glm::mat4 proj  = glm::perspective(glm::radians(45.0f), 1280.0f/720.0f, 0.1f, 10.0f);
-                proj[1][1] *= -1; 
-                
+                // Uniform güncelleme
+                glm::mat4 model = glm::rotate(glm::mat4(1.0f), currentTime,
+                                              glm::vec3(0.0f, 0.0f, 1.0f));
+                glm::mat4 view  = glm::lookAt(glm::vec3(0,0,2),
+                                              glm::vec3(0,0,0),
+                                              glm::vec3(0,1,0));
+                glm::mat4 proj  = glm::perspective(glm::radians(45.0f),
+                    m_Editor->GetViewportWidth() > 0
+                        ? m_Editor->GetViewportWidth() / m_Editor->GetViewportHeight()
+                        : 1280.0f / 720.0f,
+                    0.1f, 10.0f);
+                proj[1][1] *= -1;
+
                 m_UniformData.MVP = proj * view * model;
                 if (m_UniformBuffer) {
                     m_RHIDevice->WriteBuffer(m_UniformBuffer, &m_UniformData, sizeof(UniformData));
@@ -153,22 +120,11 @@ namespace DoEngine {
                 m_Editor->OnUpdate(m_ActiveScene.get());
             }
 
-            DO_CORE_INFO("[TRACE] Attempting Editor::EndFrame...");
             m_Editor->EndFrame();
-            DO_CORE_INFO("[TRACE] Editor::EndFrame success");
-
             m_Renderer->EndFrame();
-            DO_CORE_INFO("[TRACE] Renderer::EndFrame success");
-            
-            // Sadece ilk karede log basıp kalabalığı önleyelim
-            static bool firstFrame = true;
-            if (firstFrame) {
-                DO_CORE_INFO("First Frame completed successfully!");
-                firstFrame = false;
-            }
         }
 
-        DO_CORE_INFO("Application: Exiting Main Loop. (m_Running: {}, ShouldClose: {})", m_Running, m_Window->ShouldClose());
+        DO_CORE_INFO("Application: Exiting Main Loop.");
     }
 
     void Application::Shutdown() {

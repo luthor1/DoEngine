@@ -55,10 +55,24 @@ namespace DoEngine {
     }
 
     void VFS::Mount(const std::string& virtualPath, std::unique_ptr<IFileSystem> fs) {
+        // Aynı virtual path varsa güncelle
+        for (auto& mp : s_MountPoints) {
+            if (mp.VirtualRoot == virtualPath) {
+                mp.FileSystem = std::move(fs);
+                return;
+            }
+        }
         s_MountPoints.push_back({ virtualPath, std::move(fs) });
-        std::sort(s_MountPoints.begin(), s_MountPoints.end(), [](const MountPoint& a, const MountPoint& b) {
-            return a.VirtualRoot.length() > b.VirtualRoot.length();
-        });
+        std::sort(s_MountPoints.begin(), s_MountPoints.end(),
+            [](const MountPoint& a, const MountPoint& b) {
+                return a.VirtualRoot.length() > b.VirtualRoot.length();
+            });
+    }
+
+    void VFS::MountPath(const std::string& virtualPath, const std::string& physicalPath) {
+        Mount(virtualPath, std::make_unique<PhysicalFileSystem>(physicalPath));
+        std::cout << "[INFO] VFS: Mounted '" << virtualPath
+                  << "' -> '" << physicalPath << "'" << std::endl;
     }
 
     bool VFS::FileExists(const std::string& path) {

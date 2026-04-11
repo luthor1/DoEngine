@@ -5,7 +5,8 @@
 
 namespace DoEngine {
 
-    bool ImGui_ImplNVRHI_Init(nvrhi::IDevice* device);
+    class RHIDevice;
+    bool ImGui_ImplNVRHI_Init(RHIDevice* rhi);
     void ImGui_ImplNVRHI_Shutdown();
     void ImGui_ImplNVRHI_NewFrame();
     void ImGui_ImplNVRHI_RenderDrawData(ImDrawData* draw_data, nvrhi::ICommandList* cmd, nvrhi::IFramebuffer* fb = nullptr);
